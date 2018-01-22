@@ -6,9 +6,11 @@
  */
 
 
-#include <iostream>
+#include <sstream>
 #include <thread>
 #include <chrono>
+
+#include <ros/console.h>
 
 #define MOTOR_1     0
 #define MOTOR_2     1
@@ -49,7 +51,7 @@ Motors::Motors() : m1_duty(0), m2_duty(0), m3_duty(0), m4_duty(0)
 {
     // Start print thread
     m_kill_thread = false;
-    m_print_thread = std::thread(&Motors::print_duty, this);
+    m_print_thread = std::thread(&Motors::printDuty, this);
 }
 
 
@@ -115,10 +117,12 @@ void Motors::printDuty(void)
 {
     while (!m_kill_thread)
     {
-        std::cout << "Motor 1 Duty: " << m1_duty << "%\t"
-                  << "Motor 2 Duty: " << m2_duty << "%\t"
-                  << "Motor 3 Duty: " << m3_duty << "%\t"
-                  << "Motor 4 Duty: " << m4_duty << "%";
+        std::stringstream output;
+        output << "Motor 1 Duty: " << m1_duty << "%\t"
+               << "Motor 2 Duty: " << m2_duty << "%\t"
+               << "Motor 3 Duty: " << m3_duty << "%\t"
+               << "Motor 4 Duty: " << m4_duty << "%";
+        ROS_INFO_STREAM(output.str());
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }

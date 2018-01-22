@@ -13,15 +13,15 @@
 #include "geometry_msgs/Twist.h"
 
 #define PITCH_RATE_KP 0.7
-#define PITCH_RATE_KD 
+#define PITCH_RATE_KD 0 
 #define PITCH_RATE_KI 1
 
 #define ROLL_RATE_KP 0.7
-#define ROLL_RATE_KD 
+#define ROLL_RATE_KD 0
 #define ROLL_RATE_KI 1
 
 #define YAW_RATE_KP 0.7
-#define YAW_RATE_KD 
+#define YAW_RATE_KD 0
 #define YAW_RATE_KI 1
 
 typedef struct Vect3f
@@ -33,9 +33,9 @@ typedef struct Vect3f
 
 
 // Global variables
-MiniPID g_pitch_rate_pid(PITCH_RATE_KP, PITCH_RATE_KI, PITCH_RATE_KD);
-MiniPID g_roll_rate_pid(ROLL_RATE_KP, ROLL_RATE_KI, ROLL_RATE_KD);
-MiniPID g_yaw_rate_pid(YAW_RATE_KP, YAW_RATE_KI, YAW_RATE_KD);
+MiniPID g_pitch_rate_pid = MiniPID(PITCH_RATE_KP, PITCH_RATE_KI, PITCH_RATE_KD);
+MiniPID g_roll_rate_pid = MiniPID(ROLL_RATE_KP, ROLL_RATE_KI, ROLL_RATE_KD);
+MiniPID g_yaw_rate_pid = MiniPID(YAW_RATE_KP, YAW_RATE_KI, YAW_RATE_KD);
 
 double g_thrust(0.0); // Thrust in % of full scale
 
@@ -87,7 +87,7 @@ void imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
     run_controller(msg);
 }
 
-void twistCallback(const geometry_msgs::Twist::constPtr& msg)
+void twistCallback(const geometry_msgs::Twist::ConstPtr& msg)
 {
     g_roll_rate_pid.setSetpoint(msg->angular.x);
     g_pitch_rate_pid.setSetpoint(msg->angular.y);
