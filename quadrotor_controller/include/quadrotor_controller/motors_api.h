@@ -85,7 +85,8 @@ bool Motors::setMotorThrust(int motor, int thrust)
     }
 
     // Scale thrust to duty
-    duty = (thrust * DELTA_DUTY) + MIN_DUTY;
+    //duty = (thrust * DELTA_DUTY)/100 + MIN_DUTY;
+    duty = thrust;
 
     // Set duty to motor
     switch(motor)

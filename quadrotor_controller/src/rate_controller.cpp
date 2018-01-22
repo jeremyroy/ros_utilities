@@ -12,17 +12,17 @@
 #include "sensor_msgs/Imu.h"
 #include "geometry_msgs/Twist.h"
 
-#define PITCH_RATE_KP 0.7
-#define PITCH_RATE_KD 0 
-#define PITCH_RATE_KI 1
+#define PITCH_RATE_KP 2.5
+#define PITCH_RATE_KD 0.0 
+#define PITCH_RATE_KI 0.01
 
-#define ROLL_RATE_KP 0.7
-#define ROLL_RATE_KD 0
-#define ROLL_RATE_KI 1
+#define ROLL_RATE_KP 2.5
+#define ROLL_RATE_KD 0.0
+#define ROLL_RATE_KI 0.01
 
-#define YAW_RATE_KP 0.7
-#define YAW_RATE_KD 0
-#define YAW_RATE_KI 1
+#define YAW_RATE_KP 2.5
+#define YAW_RATE_KD 0.0
+#define YAW_RATE_KI 0.01
 
 typedef struct Vect3f
 {
@@ -45,8 +45,8 @@ Motors g_motors;
 
 void run_controller(const sensor_msgs::Imu::ConstPtr& msg)
 {
-    double sensor_roll_rate(msg->angular_velocity.x);
-    double sensor_pitch_rate(msg->angular_velocity.y);
+    double sensor_pitch_rate(msg->angular_velocity.x);
+    double sensor_roll_rate(msg->angular_velocity.y);
     double sensor_yaw_rate(msg->angular_velocity.z);
 
     // TODO: verify that the measure and desired reference frames are alligned
@@ -70,10 +70,15 @@ void run_controller(const sensor_msgs::Imu::ConstPtr& msg)
     double motor3_thrust(0);
     double motor4_thrust(0);
 
-    motor1_thrust = g_thrust + roll_thrust_adj - pitch_thrust_adj + yaw_thrust_adj;
-    motor2_thrust = g_thrust - roll_thrust_adj + pitch_thrust_adj + yaw_thrust_adj;
-    motor3_thrust = g_thrust - roll_thrust_adj - pitch_thrust_adj - yaw_thrust_adj;
-    motor4_thrust = g_thrust + roll_thrust_adj + pitch_thrust_adj - yaw_thrust_adj;
+    // motor1_thrust = g_thrust + roll_thrust_adj - pitch_thrust_adj + yaw_thrust_adj;
+    // motor2_thrust = g_thrust - roll_thrust_adj + pitch_thrust_adj + yaw_thrust_adj;
+    // motor3_thrust = g_thrust - roll_thrust_adj - pitch_thrust_adj - yaw_thrust_adj;
+    // motor4_thrust = g_thrust + roll_thrust_adj + pitch_thrust_adj - yaw_thrust_adj;
+
+    motor1_thrust = g_thrust - roll_thrust_adj + pitch_thrust_adj + yaw_thrust_adj;
+    motor2_thrust = g_thrust + roll_thrust_adj - pitch_thrust_adj + yaw_thrust_adj;
+    motor3_thrust = g_thrust + roll_thrust_adj + pitch_thrust_adj - yaw_thrust_adj;
+    motor4_thrust = g_thrust - roll_thrust_adj - pitch_thrust_adj - yaw_thrust_adj;
 
     g_motors.setMotorThrust(MOTOR_1, motor1_thrust);
     g_motors.setMotorThrust(MOTOR_2, motor2_thrust);
@@ -89,8 +94,8 @@ void imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
 
 void twistCallback(const geometry_msgs::Twist::ConstPtr& msg)
 {
-    g_roll_rate_pid.setSetpoint(msg->angular.x);
-    g_pitch_rate_pid.setSetpoint(msg->angular.y);
+    g_pitch_rate_pid.setSetpoint(msg->angular.x);
+    g_roll_rate_pid.setSetpoint(msg->angular.y);
     g_yaw_rate_pid.setSetpoint(msg->angular.z);
 
     g_thrust = msg->linear.z;
