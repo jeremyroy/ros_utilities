@@ -182,18 +182,3 @@ void FlightController::twistCallback(const geometry_msgs::Twist::ConstPtr& msg)
 
 }
 
-int main(int argc, char** argv)
-{
-    // Initialize ros node
-    ros::init(argc, argv, "quadrotor_controller");
-    ros::NodeHandle n;
-
-
-    ros::Rate r(50); // 50hz
-
-    ros::spin();
-
-    return true;
-}
-
-
