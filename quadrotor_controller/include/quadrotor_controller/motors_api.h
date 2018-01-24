@@ -118,6 +118,7 @@ void Motors::killAll(void)
     m2_duty = 0.0;
     m3_duty = 0.0;
     m4_duty = 0.0;
+    ROS_ERROR("Killing all motors");
 }
 
 

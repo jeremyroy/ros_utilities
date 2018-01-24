@@ -27,15 +27,15 @@
 
 #define PITCH_RATE_KP 2.5
 #define PITCH_RATE_KD 0.0 
-#define PITCH_RATE_KI 0.01
+#define PITCH_RATE_KI 0.001
 
 #define ROLL_RATE_KP 2.5
 #define ROLL_RATE_KD 0.0
-#define ROLL_RATE_KI 0.01
+#define ROLL_RATE_KI 0.001
 
 #define YAW_RATE_KP 2.5
 #define YAW_RATE_KD 0.0
-#define YAW_RATE_KI 0.01
+#define YAW_RATE_KI 0.001
 
 ///////////
 // Types //

@@ -11,6 +11,8 @@
 
 #include "flight_controller.h"
 
+#include <ros/console.h>
+
 /////////////////////////////
 // Methods - RateController//
 /////////////////////////////
@@ -134,6 +136,7 @@ void FlightController::imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
             thrust_adjustments = m_rate_controller.getOutput(rates);
             // Send thrust adjustments to motors
             this->applyThrustAdjustments(thrust_adjustments);
+            break;
         }
 
         case STABL:
@@ -181,6 +184,7 @@ void FlightController::twistCallback(const geometry_msgs::Twist::ConstPtr& msg)
     {
         case ACRO:
             m_rate_controller.setDesiredRates(commanded_values);
+            break;
         
         case STABL:
             //TODO
