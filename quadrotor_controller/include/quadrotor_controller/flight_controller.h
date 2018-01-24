@@ -5,6 +5,9 @@
  * @Copyright (c) Jeremy Roy, 2018
  */
 
+#ifndef FLIGHT_CONTROLLER_H
+#define FLIGHT_CONTROLLER_H
+
 //////////////
 // Includes //
 //////////////
@@ -40,6 +43,7 @@
 
 typedef struct Vect3F
 {
+    Vect3F() {}
     Vect3F(double a, double b, double c) : x(a), y(b), z(c) {}
 
     double x;
@@ -59,14 +63,14 @@ typedef enum FlightMode
 // Classes //
 /////////////
 
-class RateController()
+class RateController
 {
 public:
     RateController();
     ~RateController();
     
     void setDesiredRates(Vect3F rates);
-    Vect3F getOutput(Vect3F sensor_rates)
+    Vect3F getOutput(Vect3F sensor_rates);
 private:
     MiniPID m_pitch_rate_pid;
     MiniPID m_roll_rate_pid;
@@ -79,15 +83,17 @@ public:
     FlightController();
     ~FlightController();
 
-private:
-    double m_thrust;
-    Motors m_motor;
-    FlightMode m_flight_mode;
-
-    // Private methods
-    void applyThrustAdjustments(Vect3F thrust_adjustments);
-
     // Subscriber callback functions
     void imuCallback(const sensor_msgs::Imu::ConstPtr& msg);
     void twistCallback(const geometry_msgs::Twist::ConstPtr& msg);
+private:
+    double m_thrust;
+    Motors m_motors;
+    FlightMode m_flight_mode;
+    RateController m_rate_controller;
+
+    // Private methods
+    void applyThrustAdjustments(Vect3F thrust_adjustments);
 };
+
+#endif // FLIGHT_CONTROLLER_H

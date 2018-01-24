@@ -5,7 +5,7 @@
  * @Copyright (c) Jeremy Roy, 2018
  */
 
-#include "include/quadrotor_controller/rate_controller.h"
+#include "flight_controller.h"
 
 #include "ros/ros.h"
 #include "sensor_msgs/Imu.h"

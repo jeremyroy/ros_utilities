@@ -9,7 +9,7 @@
 // Includes //
 //////////////
 
-#include "include/quadrotor_controller/rate_controller.h"
+#include "flight_controller.h"
 
 /////////////////////////////
 // Methods - RateController//
@@ -18,7 +18,7 @@
 RateController::RateController()
     : m_pitch_rate_pid(PITCH_RATE_KP, PITCH_RATE_KI, PITCH_RATE_KD),
       m_roll_rate_pid(ROLL_RATE_KP, ROLL_RATE_KI, ROLL_RATE_KD),
-      m_yaw_rate_pid(YAW_RATE_KP, YAW_RATE_KI, YAW_RATE_KD),
+      m_yaw_rate_pid(YAW_RATE_KP, YAW_RATE_KI, YAW_RATE_KD)
 {
     // Empty constructor
 }
@@ -125,15 +125,16 @@ void FlightController::imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
     Vect3F rates(msg->angular_velocity.x, msg->angular_velocity.y, msg->angular_velocity.z);
     
     // Run controller every time new sensor data is received.
-    run_controller(msg);
     switch(m_flight_mode)
     {
         case ACRO:
+        {
             // Calculate acro thrust adjustments
             Vect3F thrust_adjustments;
             thrust_adjustments = m_rate_controller.getOutput(rates);
             // Send thrust adjustments to motors
             this->applyThrustAdjustments(thrust_adjustments);
+        }
 
         case STABL:
             //TODO
@@ -155,9 +156,21 @@ void FlightController::twistCallback(const geometry_msgs::Twist::ConstPtr& msg)
     m_thrust = msg->linear.z;
 
     // Linear velocity along y determines flight mode
-    if (msg->linear.y == 0 || msg->linear.x == 1 || msg->linear.z == 2 || msg->linear.z == 3)
+    if (msg->linear.y == 0)
     {
-        m_flight_mode = msg->linear.y;
+        m_flight_mode = DISABLE;
+    }
+    else if (msg->linear.y == 1)
+    {
+        m_flight_mode = ACRO;
+    }
+    else if (msg->linear.y == 2)
+    {
+        m_flight_mode = STABL;
+    }
+    else if (msg->linear.y == 3)
+    {
+        m_flight_mode = AUTO;
     }
 
     // Organize incomming angular control data in less verbose structure
