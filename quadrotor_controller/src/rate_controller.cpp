@@ -11,9 +11,9 @@
 
 #include "include/quadrotor_controller/rate_controller.h"
 
-/////////////
-// Methods //
-/////////////
+/////////////////////////////
+// Methods - RateController//
+/////////////////////////////
 
 RateController::RateController()
     : m_pitch_rate_pid(PITCH_RATE_KP, PITCH_RATE_KI, PITCH_RATE_KD),
@@ -68,6 +68,9 @@ Vect3F RateController::getOutput(Vect3F sensor_rates)
 }
 
 
+///////////////////////////////
+// Methods - FlightController//
+///////////////////////////////
 FlightController::FlightController()
     : m_thrust(0.0),
       m_flight_mode(DISABLE)
@@ -139,7 +142,7 @@ void FlightController::imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
             //TODO
         
         default:
-            /* Do nothing */
+            m_motors.killAll(); // Should be redundant
     }
 }
 
@@ -173,7 +176,8 @@ void FlightController::twistCallback(const geometry_msgs::Twist::ConstPtr& msg)
             //TODO
         
         default:
-            /* Do nothing */
+            m_thrust = 0.0;
+            m_motors.killAll();
     }
 
 }
