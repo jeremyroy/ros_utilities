@@ -1,49 +1,38 @@
 /**
- * @brief cpp version of a quadcopter flight controller
+ * @file rate_controller.cpp
+ * @brief cpp version of a quadcopter rate controller
  * @author Jeremy Roy <jeremy.roy@queensu.ca>
  * @Copyright (c) Jeremy Roy, 2018
  */
 
-#include "motors_api.h"
+//////////////
+// Includes //
+//////////////
 
-#include "MiniPID.h"
+#include "include/quadrotor_controller/rate_controller.h"
 
-#include "ros/ros.h"
-#include "sensor_msgs/Imu.h"
-#include "geometry_msgs/Twist.h"
+/////////////
+// Methods //
+/////////////
 
-#define PITCH_RATE_KP 2.5
-#define PITCH_RATE_KD 0.0 
-#define PITCH_RATE_KI 0.01
 
-#define ROLL_RATE_KP 2.5
-#define ROLL_RATE_KD 0.0
-#define ROLL_RATE_KI 0.01
-
-#define YAW_RATE_KP 2.5
-#define YAW_RATE_KD 0.0
-#define YAW_RATE_KI 0.01
-
-typedef struct Vect3f
+FlightController::FlightController()
+    : m_pitch_rate_pid(PITCH_RATE_KP, PITCH_RATE_KI, PITCH_RATE_KD),
+      m_roll_rate_pid(ROLL_RATE_KP, ROLL_RATE_KI, ROLL_RATE_KD),
+      m_yaw_rate_pid(YAW_RATE_KP, YAW_RATE_KI, YAW_RATE_KD),
+      m_thrust(0.0),
+      m_motors()
 {
-    double x;
-    double y;
-    double z;
-} Vect3f;
+   // Empty constructor 
+}
+
+FlightController::~FlightController()
+{
+    // Empty destructor
+}
 
 
-// Global variables
-MiniPID g_pitch_rate_pid = MiniPID(PITCH_RATE_KP, PITCH_RATE_KI, PITCH_RATE_KD);
-MiniPID g_roll_rate_pid = MiniPID(ROLL_RATE_KP, ROLL_RATE_KI, ROLL_RATE_KD);
-MiniPID g_yaw_rate_pid = MiniPID(YAW_RATE_KP, YAW_RATE_KI, YAW_RATE_KD);
-
-double g_thrust(0.0); // Thrust in % of full scale
-
-Motors g_motors;
-
-// Functions
-
-void run_controller(const sensor_msgs::Imu::ConstPtr& msg)
+std::array<double,4> rate_controller(const sensor_msgs::Imu::ConstPtr& msg)
 {
     double sensor_pitch_rate(msg->angular_velocity.x);
     double sensor_roll_rate(msg->angular_velocity.y);
@@ -80,19 +69,30 @@ void run_controller(const sensor_msgs::Imu::ConstPtr& msg)
     motor3_thrust = g_thrust + roll_thrust_adj + pitch_thrust_adj - yaw_thrust_adj;
     motor4_thrust = g_thrust - roll_thrust_adj - pitch_thrust_adj - yaw_thrust_adj;
 
-    g_motors.setMotorThrust(MOTOR_1, motor1_thrust);
-    g_motors.setMotorThrust(MOTOR_2, motor2_thrust);
-    g_motors.setMotorThrust(MOTOR_3, motor3_thrust);
-    g_motors.setMotorThrust(MOTOR_4, motor4_thrust);
+
+    std::array<double,4> thrust_vector;
+    thrust_vector.at(1) = motor1_thrust;
+    thrust_vector.at(2) = motor2_thrust;
+    thrust_vector.at(3) = motor3_thrust;
+    thrust_vector.at(4) = motor4_thrust;
+
+    return thrust_vector;
+
+
+    /* g_motors.setMotorThrust(MOTOR_1, motor1_thrust);
+     * g_motors.setMotorThrust(MOTOR_2, motor2_thrust);
+     * g_motors.setMotorThrust(MOTOR_3, motor3_thrust);
+     * g_motors.setMotorThrust(MOTOR_4, motor4_thrust);
+     */
 }
 
-void imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
+void FlightController::imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
 {
     // Run controller every time new sensor data is received.
     run_controller(msg);
 }
 
-void twistCallback(const geometry_msgs::Twist::ConstPtr& msg)
+void FlightController::twistCallback(const geometry_msgs::Twist::ConstPtr& msg)
 {
     g_pitch_rate_pid.setSetpoint(msg->angular.x);
     g_roll_rate_pid.setSetpoint(msg->angular.y);
@@ -107,8 +107,6 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "quadrotor_controller");
     ros::NodeHandle n;
 
-    ros::Subscriber sub_imu = n.subscribe("phone_imu", 1000, imuCallback);
-    ros::Subscriber sub_cmd = n.subscribe("cmd_vel", 1000, twistCallback);
 
     ros::Rate r(50); // 50hz
 
