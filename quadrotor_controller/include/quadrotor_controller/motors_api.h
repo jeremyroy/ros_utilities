@@ -18,8 +18,8 @@
 #define MOTOR_4     3
 
 // TODO: Figure out what these values are IRL
-#define MIN_DUTY    2
-#define MAX_DUTY    8
+#define MIN_DUTY    2.0
+#define MAX_DUTY    8.0
 #define DELTA_DUTY  (MAX_DUTY - MIN_DUTY)
 
 
@@ -30,10 +30,11 @@
 class Motors
 {
 public:
-    Motors(); // Constructor
-    ~Motors(); // Destructor
+    Motors(void); // Constructor
+    ~Motors(void); // Destructor
 
     bool setMotorThrust(int motor, int thrust);
+    void killAll(void);
 
 private:
     double m1_duty, m2_duty, m3_duty, m4_duty;
@@ -47,7 +48,7 @@ private:
 /**
  * @brief Constructor.  Start the print thread
  */
-Motors::Motors() : m1_duty(0), m2_duty(0), m3_duty(0), m4_duty(0)
+Motors::Motors(void) : m1_duty(0), m2_duty(0), m3_duty(0), m4_duty(0)
 {
     // Start print thread
     m_kill_thread = false;
@@ -58,7 +59,7 @@ Motors::Motors() : m1_duty(0), m2_duty(0), m3_duty(0), m4_duty(0)
 /**
  * @brief Destructor.  Kill the print thread
  */
-Motors::~Motors()
+Motors::~Motors(void)
 {
     m_kill_thread = true;
     m_print_thread.join();
@@ -85,8 +86,8 @@ bool Motors::setMotorThrust(int motor, int thrust)
     }
 
     // Scale thrust to duty
-    //duty = (thrust * DELTA_DUTY)/100 + MIN_DUTY;
-    duty = thrust;
+    duty = (thrust * DELTA_DUTY)/100.0 + MIN_DUTY;
+    //duty = thrust;
 
     // Set duty to motor
     switch(motor)
@@ -108,6 +109,16 @@ bool Motors::setMotorThrust(int motor, int thrust)
             return false;
     }
     return true; // Return true if duty successfully set
+}
+
+
+void Motors::killAll(void)
+{
+    m1_duty = 0.0;
+    m2_duty = 0.0;
+    m3_duty = 0.0;
+    m4_duty = 0.0;
+    ROS_ERROR("Killing all motors");
 }
 
 
