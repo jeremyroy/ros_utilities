@@ -25,17 +25,29 @@
 // Defines //
 /////////////
 
-#define PITCH_RATE_KP 2.5
+#define PITCH_RATE_KP 0.7
 #define PITCH_RATE_KD 0.0 
 #define PITCH_RATE_KI 0.001
 
-#define ROLL_RATE_KP 2.5
+#define ROLL_RATE_KP 0.7
 #define ROLL_RATE_KD 0.0
 #define ROLL_RATE_KI 0.001
 
 #define YAW_RATE_KP 2.5
 #define YAW_RATE_KD 0.0
 #define YAW_RATE_KI 0.001
+
+#define PITCH_STAB_KP 4.5
+#define PITCH_STAB_KD 0.0 
+#define PITCH_STAB_KI 0.0
+
+#define ROLL_STAB_KP 4.5
+#define ROLL_STAB_KD 0.0
+#define ROLL_STAB_KI 0.0
+
+#define YAW_STAB_KP 10
+#define YAW_STAB_KD 0.0
+#define YAW_STAB_KI 0.0
 
 ///////////
 // Types //
@@ -77,6 +89,20 @@ private:
     MiniPID m_yaw_rate_pid;
 };
 
+class AttitudeController
+{
+public:
+    AttitudeController();
+    ~AttitudeController();
+
+    void setDesiredAtt(Vect3F orientation);
+    Vect3F getOutput(Vect3F sensor_orientation
+private:
+    MiniPID m_pitch_att_pid;
+    MiniPID m_roll_att_pid;
+    MiniPID m_yaw_att_pid;
+};
+
 class FlightController
 {
 public:
@@ -91,6 +117,7 @@ private:
     Motors m_motors;
     FlightMode m_flight_mode;
     RateController m_rate_controller;
+    AttitudeController m_att_controller;
 
     // Private methods
     void applyThrustAdjustments(Vect3F thrust_adjustments);

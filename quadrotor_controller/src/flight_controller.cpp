@@ -70,9 +70,66 @@ Vect3F RateController::getOutput(Vect3F sensor_rates)
 }
 
 
+/////////////////////////////////
+// Methods - AttitudeController//
+/////////////////////////////////
+
+AttitudeController::AttitudeController()
+{
+    : m_pitch_stab_pid(PITCH_STAB_KP, PITCH_STAB_KI, PITCH_STAB_KD),
+      m_roll_stab_pid(ROLL_STAB_KP, ROLL_STAB_KI, ROLL_STAB_KD),
+      m_yaw_stab_pid(YAW_STAB_KP, YAW_STAB_KI, YAW_STAB_KD)
+}
+
+
+AttitudeController::~AttitudeController()
+{
+    // Empty destructor
+}
+
+
+AttitudeController::setDesiredAtt(Vect3F orientation)
+{
+    m_pitch_stab_pid.setSetpoint(orientation.x);
+    m_roll_stab_pid.setSetpoint(orientation.y);
+    m_yaw_stab_pid.setSetpoint(orientation.z);
+}
+
+
+AttitudeController::getOutput(Vect3F sensor_orientation)
+{
+    double sensor_roll_stab(sensor_orientation.y);
+    double sensor_pitch_stab(sensor_orientation.x);
+    double sensor_yaw_stab(sensor_orientation.z);
+
+    // TODO: verify that the measure and desired reference frames are alligned
+    // 
+    // Run controller 
+    // Assume both angular velocities are in radians per second
+    //
+    // Calculate andular rate adjustments (in % of full scale)
+    double roll_rate_adj(0.0);
+    double pitch_rate_adj(0.0);
+    double yaw_rate_adj(0.0);
+    
+    roll_rate_adj  = m_roll_stab_pid.getOutput(sensor_roll_stab);
+    pitch_rate_adj = m_pitch_stab_pid.getOutput(sensor_pitch_stab);
+    yaw_rate_adj   = m_yaw_stab_pid.getOutput(sensor_yaw_stab);
+
+    // Format and return angular rate adjustments
+    Vect3F rate_adj;
+    rate_adj.x = roll_rate_adj;
+    rate_adj.y = pitch_rate_adj;
+    rate_adj.z = yaw_rate_adj;
+
+    return rate_adj;
+}
+
+
 ///////////////////////////////
 // Methods - FlightController//
 ///////////////////////////////
+
 FlightController::FlightController()
     : m_thrust(0.0),
       m_flight_mode(DISABLE)
@@ -86,11 +143,6 @@ FlightController::~FlightController()
     // Empty destructor
 }
 
-
-std::array<double,4> rate_controller(const sensor_msgs::Imu::ConstPtr& msg)
-{
-
-}
 
 void FlightController::applyThrustAdjustments(Vect3F thrust_adjustments)
 {
@@ -125,6 +177,7 @@ void FlightController::imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
 {
     // Organize incomming sensor data in less verbose structures
     Vect3F rates(msg->angular_velocity.x, msg->angular_velocity.y, msg->angular_velocity.z);
+    Vect3F orientation(/*TODO*/); // Orientation in Euler angles.  Should translate to orientation from quaternion.
     
     // Run controller every time new sensor data is received.
     switch(m_flight_mode)
@@ -140,7 +193,17 @@ void FlightController::imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
         }
 
         case STABL:
-            //TODO
+        {
+            // Calculate stabalize angular velocity adjustments
+            Vect3F rate_adjustments;
+            rate_adjustments = m_att_controller.getOutput(orientation);
+            // Calculate stabalize thrust adjustments
+            Vect3F thrust_adjustments;
+            thrust_adjustments = m_rate_controller.getOutput(rate_adjustments);
+            // Send thrust adjustments to motors
+            this->applyThrustAdjustments(thrust_adjustments);
+            break;
+        }
         
         case AUTO:
             //TODO
@@ -187,7 +250,9 @@ void FlightController::twistCallback(const geometry_msgs::Twist::ConstPtr& msg)
             break;
         
         case STABL:
-            //TODO
+            //TODO: might need to set desired yaw angle as current_yaw + input value
+            m_att_controller.setDesiredAtt(commanded_values);
+            break;
         
         case AUTO:
             //TODO
