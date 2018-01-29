@@ -37,17 +37,17 @@
 #define YAW_RATE_KD 0.0
 #define YAW_RATE_KI 0.001
 
-#define PITCH_STAB_KP 4.5
-#define PITCH_STAB_KD 0.0 
-#define PITCH_STAB_KI 0.0
+#define PITCH_ATT_KP 4.5
+#define PITCH_ATT_KD 0.0 
+#define PITCH_ATT_KI 0.0
 
-#define ROLL_STAB_KP 4.5
-#define ROLL_STAB_KD 0.0
-#define ROLL_STAB_KI 0.0
+#define ROLL_ATT_KP 4.5
+#define ROLL_ATT_KD 0.0
+#define ROLL_ATT_KI 0.0
 
-#define YAW_STAB_KP 10
-#define YAW_STAB_KD 0.0
-#define YAW_STAB_KI 0.0
+#define YAW_ATT_KP 10
+#define YAW_ATT_KD 0.0
+#define YAW_ATT_KI 0.0
 
 ///////////
 // Types //
@@ -62,6 +62,24 @@ typedef struct Vect3F
     double y;
     double z;
 } Vect3F;
+
+typedef struct Quat
+{
+    Quat() {}
+    Quat(double a, double b, double c, double d) : w(a), x(b), y(c), z(d) {}
+
+    double w;
+    double x;
+    double y;
+    double z;
+} Quat;
+
+typedef struct RotMatrix
+{
+    double R11, R12, R13;
+    double R21, R22, R23;
+    double R31, R32, R33;
+} RotMatrix;
 
 typedef enum FlightMode
 {
@@ -96,7 +114,7 @@ public:
     ~AttitudeController();
 
     void setDesiredAtt(Vect3F orientation);
-    Vect3F getOutput(Vect3F sensor_orientation
+    Vect3F getOutput(Vect3F sensor_orientation);
 private:
     MiniPID m_pitch_att_pid;
     MiniPID m_roll_att_pid;

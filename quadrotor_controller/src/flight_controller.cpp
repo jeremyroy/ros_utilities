@@ -11,6 +11,8 @@
 
 #include "flight_controller.h"
 
+#include <cmath>
+
 #include <ros/console.h>
 
 /////////////////////////////
@@ -75,10 +77,11 @@ Vect3F RateController::getOutput(Vect3F sensor_rates)
 /////////////////////////////////
 
 AttitudeController::AttitudeController()
+    : m_pitch_att_pid(PITCH_ATT_KP, PITCH_ATT_KI, PITCH_ATT_KD),
+      m_roll_att_pid(ROLL_ATT_KP, ROLL_ATT_KI, ROLL_ATT_KD),
+      m_yaw_att_pid(YAW_ATT_KP, YAW_ATT_KI, YAW_ATT_KD)
 {
-    : m_pitch_stab_pid(PITCH_STAB_KP, PITCH_STAB_KI, PITCH_STAB_KD),
-      m_roll_stab_pid(ROLL_STAB_KP, ROLL_STAB_KI, ROLL_STAB_KD),
-      m_yaw_stab_pid(YAW_STAB_KP, YAW_STAB_KI, YAW_STAB_KD)
+    // Empty constructor
 }
 
 
@@ -88,19 +91,19 @@ AttitudeController::~AttitudeController()
 }
 
 
-AttitudeController::setDesiredAtt(Vect3F orientation)
+void AttitudeController::setDesiredAtt(Vect3F orientation)
 {
-    m_pitch_stab_pid.setSetpoint(orientation.x);
-    m_roll_stab_pid.setSetpoint(orientation.y);
-    m_yaw_stab_pid.setSetpoint(orientation.z);
+    m_pitch_att_pid.setSetpoint(orientation.x);
+    m_roll_att_pid.setSetpoint(orientation.y);
+    m_yaw_att_pid.setSetpoint(orientation.z);
 }
 
 
-AttitudeController::getOutput(Vect3F sensor_orientation)
+Vect3F AttitudeController::getOutput(Vect3F sensor_orientation)
 {
-    double sensor_roll_stab(sensor_orientation.y);
-    double sensor_pitch_stab(sensor_orientation.x);
-    double sensor_yaw_stab(sensor_orientation.z);
+    double sensor_roll_att(sensor_orientation.y);
+    double sensor_pitch_att(sensor_orientation.x);
+    double sensor_yaw_att(sensor_orientation.z);
 
     // TODO: verify that the measure and desired reference frames are alligned
     // 
@@ -112,9 +115,9 @@ AttitudeController::getOutput(Vect3F sensor_orientation)
     double pitch_rate_adj(0.0);
     double yaw_rate_adj(0.0);
     
-    roll_rate_adj  = m_roll_stab_pid.getOutput(sensor_roll_stab);
-    pitch_rate_adj = m_pitch_stab_pid.getOutput(sensor_pitch_stab);
-    yaw_rate_adj   = m_yaw_stab_pid.getOutput(sensor_yaw_stab);
+    roll_rate_adj  = m_roll_att_pid.getOutput(sensor_roll_att);
+    pitch_rate_adj = m_pitch_att_pid.getOutput(sensor_pitch_att);
+    yaw_rate_adj   = m_yaw_att_pid.getOutput(sensor_yaw_att);
 
     // Format and return angular rate adjustments
     Vect3F rate_adj;
@@ -173,11 +176,43 @@ void FlightController::applyThrustAdjustments(Vect3F thrust_adjustments)
     m_motors.setMotorThrust(MOTOR_4, motor4_thrust);
 }
 
+// This function is from wikipedia.
+// TODO: test to make sure it outputs valid results.
+Vect3F quat2Euler(Quat q)
+{
+    Vect3F rpy;
+
+    // roll (x-axis rotation)
+    double sinr = +2.0 * (q.w * q.x + q.y * q.z);
+    double cosr = +1.0 - 2.0 * (q.x * q.x + q.y * q.y);
+    rpy.x = std::atan2(sinr, cosr);
+
+    // pitch (y-axis rotation)
+    double sinp = +2.0 * (q.w * q.y - q.z * q.x);
+    if (std::fabs(sinp) >= 1)
+    {
+        rpy.y = std::copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+    }
+    else
+    {
+       rpy.y = std::asin(sinp);
+    }
+
+    // yaw (z-axis rotation)
+    double siny = +2.0 * (q.w * q.z + q.x * q.y);
+    double cosy = +1.0 - 2.0 * (q.y * q.y + q.z * q.z);  
+    rpy.z = std::atan2(siny, cosy);
+
+    return rpy;
+}
+
 void FlightController::imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
 {
     // Organize incomming sensor data in less verbose structures
     Vect3F rates(msg->angular_velocity.x, msg->angular_velocity.y, msg->angular_velocity.z);
-    Vect3F orientation(/*TODO*/); // Orientation in Euler angles.  Should translate to orientation from quaternion.
+    
+    Quat quat(msg->orientation.w, msg->orientation.x, msg->orientation.y, msg->orientation.z);
+    Vect3F orientation = quat2Euler(quat);
     
     // Run controller every time new sensor data is received.
     switch(m_flight_mode)
