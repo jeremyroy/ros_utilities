@@ -18,6 +18,7 @@
 
 #include "MiniPID.h"
 
+#include "ros/ros.h"
 #include "sensor_msgs/Imu.h"
 #include "geometry_msgs/Twist.h"
 
@@ -124,7 +125,7 @@ private:
 class FlightController
 {
 public:
-    FlightController();
+    FlightController(const ros::Publisher *publisher);
     ~FlightController();
 
     // Subscriber callback functions
@@ -136,6 +137,8 @@ private:
     FlightMode m_flight_mode;
     RateController m_rate_controller;
     AttitudeController m_att_controller;
+
+    const ros::Publisher *m_motor_publisher;
 
     // Private methods
     void applyThrustAdjustments(Vect3F thrust_adjustments);

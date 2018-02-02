@@ -10,10 +10,11 @@
 //////////////
 
 #include "flight_controller.h"
+#include "quadrotor_controller/MotorCTRL.h"
 
 #include <cmath>
 
-#include <ros/console.h>
+//#include <ros/console.h>
 
 /////////////////////////////
 // Methods - RateController//
@@ -133,9 +134,10 @@ Vect3F AttitudeController::getOutput(Vect3F sensor_orientation)
 // Methods - FlightController//
 ///////////////////////////////
 
-FlightController::FlightController()
+FlightController::FlightController(const ros::Publisher *publisher)
     : m_thrust(0.0),
-      m_flight_mode(DISABLE)
+      m_flight_mode(DISABLE),
+      m_motor_publisher(publisher)
 {
    // Empty constructor 
 }
@@ -151,6 +153,8 @@ void FlightController::applyThrustAdjustments(Vect3F thrust_adjustments)
 {
     double roll_thrust_adj, pitch_thrust_adj, yaw_thrust_adj;
     double motor1_thrust, motor2_thrust, motor3_thrust, motor4_thrust;
+
+    quadrotor_controller::MotorCTRL motor_ctrl_msg;
     
     // Re-assign input vector to make it's values more comprehensive
     roll_thrust_adj  = thrust_adjustments.x;
@@ -169,11 +173,20 @@ void FlightController::applyThrustAdjustments(Vect3F thrust_adjustments)
     motor3_thrust = m_thrust + roll_thrust_adj + pitch_thrust_adj - yaw_thrust_adj;
     motor4_thrust = m_thrust - roll_thrust_adj - pitch_thrust_adj - yaw_thrust_adj;
 
-    // Send new thrust to motors
+    // Publish motor control message
+    motor_ctrl_msg.m1 = motor1_thrust;
+    motor_ctrl_msg.m2 = motor2_thrust;
+    motor_ctrl_msg.m3 = motor3_thrust;
+    motor_ctrl_msg.m4 = motor4_thrust;
+
+    m_motor_publisher->publish(motor_ctrl_msg);
+
+    /*// Send new thrust to motors
     m_motors.setMotorThrust(MOTOR_1, motor1_thrust);
     m_motors.setMotorThrust(MOTOR_2, motor2_thrust);
     m_motors.setMotorThrust(MOTOR_3, motor3_thrust);
     m_motors.setMotorThrust(MOTOR_4, motor4_thrust);
+    */
 }
 
 // This function is from wikipedia.
