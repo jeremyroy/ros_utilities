@@ -177,31 +177,23 @@ void FlightController::applyThrustAdjustments(Vect3F thrust_adjustments)
 }
 
 // This function is from wikipedia.
-// TODO: test to make sure it outputs valid results.
 Vect3F quat2Euler(Quat q)
 {
     Vect3F rpy;
 
-    // roll (x-axis rotation)
-    double sinr = +2.0 * (q.w * q.x + q.y * q.z);
-    double cosr = +1.0 - 2.0 * (q.x * q.x + q.y * q.y);
-    rpy.x = std::atan2(sinr, cosr);
+    // Yaw (z-axis rotation)
+    double siny = +2.0 * (-q.y * q.z + q.w * q.x);
+    double cosy = -q.z * q.z + q.y * q.y - q.x * q.x + q.w * q.w; 
+    rpy.z = -std::atan2(siny, -cosy);
 
-    // pitch (y-axis rotation)
-    double sinp = +2.0 * (q.w * q.y - q.z * q.x);
-    if (std::fabs(sinp) >= 1)
-    {
-        rpy.y = std::copysign(M_PI / 2, sinp); // use 90 degrees if out of range
-    }
-    else
-    {
-       rpy.y = std::asin(sinp);
-    }
+    // Roll (x-axis rotation)
+    double sinr = +2.0 * (q.x * q.y + q.w * q.z);
+    rpy.x = -std::asin(sinr);
 
-    // yaw (z-axis rotation)
-    double siny = +2.0 * (q.w * q.z + q.x * q.y);
-    double cosy = +1.0 - 2.0 * (q.y * q.y + q.z * q.z);  
-    rpy.z = std::atan2(siny, cosy);
+    // Pitch (y-axis rotation)
+    double sinp = +2.0 * (-q.x * q.z + q.w * q.y);
+    double cosp = - q.z * q.z - q.y * q.y + q.x * q.x + q.w * q.w;  
+    rpy.y = -std::atan2(sinp, cosp);
 
     return rpy;
 }
