@@ -22,6 +22,10 @@
 #include "sensor_msgs/Imu.h"
 #include "geometry_msgs/Twist.h"
 
+#include "hector_uav_msgs/YawrateCommand.h"
+#include "hector_uav_msgs/ThrustCommand.h"
+#include "hector_uav_msgs/AttitudeCommand.h"
+
 /////////////
 // Defines //
 /////////////
@@ -130,11 +134,20 @@ public:
 
     // Subscriber callback functions
     void imuCallback(const sensor_msgs::Imu::ConstPtr& msg);
-    void twistCallback(const geometry_msgs::Twist::ConstPtr& msg);
+    //void twistCallback(const geometry_msgs::Twist::ConstPtr& msg);
+    void thrustCallback(const hector_uav_msgs::ThrustCommand::ConstPtr& msg);
+    void yawCallback(const hector_uav_msgs::YawrateCommand::ConstPtr& msg);
+    void attitudeCallback(const hector_uav_msgs::AttitudeCommand::ConstPtr& msg);
 private:
+    // State attributes
     double m_thrust;
-    Motors m_motors;
+    double m_pitch;
+    double m_roll;
+    double m_yaw;
     FlightMode m_flight_mode;
+
+    // Motors and controllers
+    //Motors m_motors;
     RateController m_rate_controller;
     AttitudeController m_att_controller;
 

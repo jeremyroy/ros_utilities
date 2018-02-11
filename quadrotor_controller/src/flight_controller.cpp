@@ -10,7 +10,7 @@
 //////////////
 
 #include "flight_controller.h"
-#include "quadrotor_controller/MotorCTRL.h"
+#include "simone_msgs/MotorCTRL.h"
 
 #include <cmath>
 
@@ -154,7 +154,7 @@ void FlightController::applyThrustAdjustments(Vect3F thrust_adjustments)
     double roll_thrust_adj, pitch_thrust_adj, yaw_thrust_adj;
     double motor1_thrust, motor2_thrust, motor3_thrust, motor4_thrust;
 
-    quadrotor_controller::MotorCTRL motor_ctrl_msg;
+    simone_msgs::MotorCTRL motor_ctrl_msg;
     
     // Re-assign input vector to make it's values more comprehensive
     roll_thrust_adj  = thrust_adjustments.x;
@@ -219,6 +219,9 @@ void FlightController::imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
     Quat quat(msg->orientation.w, msg->orientation.x, msg->orientation.y, msg->orientation.z);
     Vect3F orientation = quat2Euler(quat);
     
+    // TODO: unset HARD flight mode
+    m_flight_mode = STABL;
+
     // Run controller every time new sensor data is received.
     switch(m_flight_mode)
     {
@@ -249,11 +252,12 @@ void FlightController::imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
             //TODO
         
         default:
-            m_motors.killAll(); // Should be redundant
+            //m_motors.killAll(); // Should be redundant
+            break;
     }
 }
 
-void FlightController::twistCallback(const geometry_msgs::Twist::ConstPtr& msg)
+/*void FlightController::twistCallback(const geometry_msgs::Twist::ConstPtr& msg)
 {
     // Global thrust based on Twist message's vertical linear velocity
     // This controller does not attempt to set the quadrotor's linear or
@@ -299,8 +303,37 @@ void FlightController::twistCallback(const geometry_msgs::Twist::ConstPtr& msg)
         
         default:
             m_thrust = 0.0;
-            m_motors.killAll();
+            //m_motors.killAll();
     }
 
+}*/
+
+void FlightController::thrustCallback(const hector_uav_msgs::ThrustCommand::ConstPtr& msg)
+{
+    m_thrust = msg->thrust;
 }
 
+void FlightController::yawCallback(const hector_uav_msgs::YawrateCommand::ConstPtr& msg)
+{
+    // Get commanded value
+    m_yaw = msg->turnrate; 
+
+    // Build control inputs from current state
+    Vect3F commanded_values(m_pitch, m_roll, m_yaw); // formatted as phone's x, y, z axis
+
+    // Update the controller with the new desired state
+    m_att_controller.setDesiredAtt(commanded_values);
+}
+
+void FlightController::attitudeCallback(const hector_uav_msgs::AttitudeCommand::ConstPtr& msg)
+{
+    // Get commanded value
+    m_roll = msg->roll; 
+    m_pitch = msg->pitch; 
+
+    // Build control inputs from current state
+    Vect3F commanded_values(m_pitch, m_roll, m_yaw); // formatted as phone's x, y, z axis
+
+    // Update the controller with the new desired state
+    m_att_controller.setDesiredAtt(commanded_values);
+}
