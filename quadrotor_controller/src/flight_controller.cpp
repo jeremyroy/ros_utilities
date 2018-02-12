@@ -148,6 +148,14 @@ FlightController::~FlightController()
     // Empty destructor
 }
 
+double truncate(double value, double low, double high)
+{
+    if (value < low)
+        value = low;
+    else if (value > high)
+        value = high;
+    return value;
+}
 
 void FlightController::applyThrustAdjustments(Vect3F thrust_adjustments)
 {
@@ -168,10 +176,16 @@ void FlightController::applyThrustAdjustments(Vect3F thrust_adjustments)
     // motor3_thrust = m_thrust - roll_thrust_adj - pitch_thrust_adj - yaw_thrust_adj;
     // motor4_thrust = m_thrust + roll_thrust_adj + pitch_thrust_adj - yaw_thrust_adj;
 
-    motor1_thrust = m_thrust - roll_thrust_adj + pitch_thrust_adj + yaw_thrust_adj;
+    motor4_thrust = m_thrust - roll_thrust_adj + pitch_thrust_adj + yaw_thrust_adj;
     motor2_thrust = m_thrust + roll_thrust_adj - pitch_thrust_adj + yaw_thrust_adj;
     motor3_thrust = m_thrust + roll_thrust_adj + pitch_thrust_adj - yaw_thrust_adj;
-    motor4_thrust = m_thrust - roll_thrust_adj - pitch_thrust_adj - yaw_thrust_adj;
+    motor1_thrust = m_thrust - roll_thrust_adj - pitch_thrust_adj - yaw_thrust_adj;
+
+    // Make sure values do not exceed limits
+    motor1_thrust = truncate(motor1_thrust, 0.0, 100.0);
+    motor2_thrust = truncate(motor2_thrust, 0.0, 100.0);
+    motor3_thrust = truncate(motor3_thrust, 0.0, 100.0);
+    motor4_thrust = truncate(motor4_thrust, 0.0, 100.0);
 
     // Publish motor control message
     motor_ctrl_msg.m1 = motor1_thrust;
@@ -240,6 +254,7 @@ void FlightController::imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
             // Calculate stabalize angular velocity adjustments
             Vect3F rate_adjustments;
             rate_adjustments = m_att_controller.getOutput(orientation);
+            rate_adjustments.z = m_yaw;
             // Calculate stabalize thrust adjustments
             Vect3F thrust_adjustments;
             thrust_adjustments = m_rate_controller.getOutput(rate_adjustments);
@@ -310,7 +325,7 @@ void FlightController::imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
 
 void FlightController::thrustCallback(const hector_uav_msgs::ThrustCommand::ConstPtr& msg)
 {
-    m_thrust = msg->thrust;
+    m_thrust = 40 - (msg->thrust * 2);
 }
 
 void FlightController::yawCallback(const hector_uav_msgs::YawrateCommand::ConstPtr& msg)
@@ -328,8 +343,8 @@ void FlightController::yawCallback(const hector_uav_msgs::YawrateCommand::ConstP
 void FlightController::attitudeCallback(const hector_uav_msgs::AttitudeCommand::ConstPtr& msg)
 {
     // Get commanded value
-    m_roll = msg->roll; 
-    m_pitch = msg->pitch; 
+    m_roll = msg->roll * 1.5; 
+    m_pitch = msg->pitch * 1.5; 
 
     // Build control inputs from current state
     Vect3F commanded_values(m_pitch, m_roll, m_yaw); // formatted as phone's x, y, z axis
