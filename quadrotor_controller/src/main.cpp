@@ -18,11 +18,8 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "quadrotor_controller");
     ros::NodeHandle n;
 
-    // Create MotorCTRL puslisher
-    ros::Publisher pub_motors = n.advertise<simone_msgs::MotorCTRL>("motor_ctrl", 1000);
-
     // Create flight controller object
-    FlightController flight_controller(&pub_motors);
+    FlightController flight_controller(&n);
 
     // Subscribe to imu and twist messages
     ros::Subscriber sub_imu = n.subscribe("phone_imu", 1000, &FlightController::imuCallback, &flight_controller);

@@ -1,6 +1,6 @@
 /**
  * @file rate_controller.cpp
- * @brief cpp version of a quadcopter rate controller
+ * @brief cpp version of a quadrotor rate controller
  * @author Jeremy Roy <jeremy.roy@queensu.ca>
  * @Copyright (c) Jeremy Roy, 2018
  */
@@ -12,7 +12,10 @@
 #include "flight_controller.h"
 #include "simone_msgs/MotorCTRL.h"
 
+#include <ros/console.h>
+
 #include <cmath>
+#include <sstream>
 
 //#include <ros/console.h>
 
@@ -20,10 +23,10 @@
 // Methods - RateController//
 /////////////////////////////
 
-RateController::RateController()
-    : m_pitch_rate_pid(PITCH_RATE_KP, PITCH_RATE_KI, PITCH_RATE_KD),
-      m_roll_rate_pid(ROLL_RATE_KP, ROLL_RATE_KI, ROLL_RATE_KD),
-      m_yaw_rate_pid(YAW_RATE_KP, YAW_RATE_KI, YAW_RATE_KD)
+RateController::RateController(Vect3F roll, Vect3F pitch, Vect3F yaw)
+    : m_roll_rate_pid(roll.x, roll.y, roll.z),
+      m_pitch_rate_pid(pitch.x, pitch.y, pitch.z),
+      m_yaw_rate_pid(yaw.x, yaw.y, yaw.z)
 {
     // Empty constructor
 }
@@ -72,15 +75,28 @@ Vect3F RateController::getOutput(Vect3F sensor_rates)
     return thrust_adj;
 }
 
+void RateController::reset(Vect3F roll, Vect3F pitch, Vect3F yaw)
+{
+    // Update PID values
+    m_roll_rate_pid.setPID(roll.x, roll.y, roll.z);
+    m_pitch_rate_pid.setPID(pitch.x, pitch.y, pitch.z);
+    m_yaw_rate_pid.setPID(yaw.x, yaw.y, yaw.z);
+
+    // Reset PIDs
+    m_roll_rate_pid.reset();
+    m_pitch_rate_pid.reset();
+    m_yaw_rate_pid.reset();
+}
+
 
 /////////////////////////////////
 // Methods - AttitudeController//
 /////////////////////////////////
 
-AttitudeController::AttitudeController()
-    : m_pitch_att_pid(PITCH_ATT_KP, PITCH_ATT_KI, PITCH_ATT_KD),
-      m_roll_att_pid(ROLL_ATT_KP, ROLL_ATT_KI, ROLL_ATT_KD),
-      m_yaw_att_pid(YAW_ATT_KP, YAW_ATT_KI, YAW_ATT_KD)
+AttitudeController::AttitudeController(Vect3F roll, Vect3F pitch, Vect3F yaw)
+    : m_roll_att_pid(roll.x, roll.y, roll.z),
+      m_pitch_att_pid(pitch.x, pitch.y, pitch.z),
+      m_yaw_att_pid(yaw.x, yaw.y, yaw.z)
 {
     // Empty constructor
 }
@@ -129,23 +145,83 @@ Vect3F AttitudeController::getOutput(Vect3F sensor_orientation)
     return rate_adj;
 }
 
+void AttitudeController::reset(Vect3F roll, Vect3F pitch, Vect3F yaw)
+{
+    // Update PID values
+    m_roll_att_pid.setPID(roll.x, roll.y, roll.z);
+    m_pitch_att_pid.setPID(pitch.x, pitch.y, pitch.z);
+    m_yaw_att_pid.setPID(yaw.x, yaw.y, yaw.z);
+
+    // Reset PIDs
+    m_roll_att_pid.reset();
+    m_pitch_att_pid.reset();
+    m_yaw_att_pid.reset();
+}
+
 
 ///////////////////////////////
 // Methods - FlightController//
 ///////////////////////////////
 
-FlightController::FlightController(const ros::Publisher *publisher)
+FlightController::FlightController(ros::NodeHandle *nh)
     : m_thrust(0.0),
       m_flight_mode(DISABLE),
-      m_motor_publisher(publisher)
+      m_node(nh)
 {
-   // Empty constructor 
+    // Create MotorCTRL puslisher
+    m_motor_publisher = m_node->advertise<simone_msgs::MotorCTRL>("motor_ctrl", 1000);
+
+    // Load parameters
+    this->loadParameters();
+
+    // Initialize the rate and attitude controllers
+    m_rate_controller = new RateController(m_roll_rate_pid_terms, 
+            m_pitch_rate_pid_terms, m_yaw_rate_pid_terms);
+    m_att_controller = new AttitudeController(m_roll_att_pid_terms, 
+            m_pitch_att_pid_terms, m_yaw_att_pid_terms);
+
+    // Set up dynamic reconfigure callback
+    m_dr_cb = boost::bind(&FlightController::dynamicReconfigureCallback, this, _1, _2);
+    m_dr_server.setCallback(m_dr_cb);
 }
 
 
 FlightController::~FlightController()
 {
     // Empty destructor
+}
+
+void FlightController::loadParameters(void)
+{
+    // Load the Roll Rate PID parameters
+    m_node->param("rate_roll_KP", m_roll_rate_pid_terms.x, DEFAULT_ROLL_RATE_KP);
+    m_node->param("rate_roll_KI", m_roll_rate_pid_terms.y, DEFAULT_ROLL_RATE_KI);
+    m_node->param("rate_roll_KD", m_roll_rate_pid_terms.z, DEFAULT_ROLL_RATE_KD);
+
+    // Load the Pitch Rate PID parameters
+    m_node->param("rate_pitch_KP", m_pitch_rate_pid_terms.x, DEFAULT_PITCH_RATE_KP);
+    m_node->param("rate_pitch_KI", m_pitch_rate_pid_terms.y, DEFAULT_PITCH_RATE_KI);
+    m_node->param("rate_pitch_KD", m_pitch_rate_pid_terms.z, DEFAULT_PITCH_RATE_KD);
+
+    // Load the Yaw Rate PID parameters
+    m_node->param("rate_yaw_KP", m_yaw_rate_pid_terms.x, DEFAULT_YAW_RATE_KP);
+    m_node->param("rate_yaw_KI", m_yaw_rate_pid_terms.y, DEFAULT_YAW_RATE_KI);
+    m_node->param("rate_yaw_KD", m_yaw_rate_pid_terms.z, DEFAULT_YAW_RATE_KD);
+
+    // Load the Roll Attitude PID parameters
+    m_node->param("att_roll_KP", m_roll_att_pid_terms.x, DEFAULT_ROLL_ATT_KP);
+    m_node->param("att_roll_KI", m_roll_att_pid_terms.y, DEFAULT_ROLL_ATT_KI);
+    m_node->param("att_roll_KD", m_roll_att_pid_terms.z, DEFAULT_ROLL_ATT_KD);
+
+    // Load the Pitch Attitude PID parameters
+    m_node->param("att_pitch_KP", m_pitch_att_pid_terms.x, DEFAULT_PITCH_ATT_KP);
+    m_node->param("att_pitch_KI", m_pitch_att_pid_terms.y, DEFAULT_PITCH_ATT_KI);
+    m_node->param("att_pitch_KD", m_pitch_att_pid_terms.z, DEFAULT_PITCH_ATT_KD);
+
+    // Load the Yaw Attitude PID parameters
+    m_node->param("att_yaw_KP", m_yaw_att_pid_terms.x, DEFAULT_YAW_ATT_KP);
+    m_node->param("att_yaw_KI", m_yaw_att_pid_terms.y, DEFAULT_YAW_ATT_KI);
+    m_node->param("att_yaw_KD", m_yaw_att_pid_terms.z, DEFAULT_YAW_ATT_KD);
 }
 
 double truncate(double value, double low, double high)
@@ -193,7 +269,7 @@ void FlightController::applyThrustAdjustments(Vect3F thrust_adjustments)
     motor_ctrl_msg.m3 = motor3_thrust;
     motor_ctrl_msg.m4 = motor4_thrust;
 
-    m_motor_publisher->publish(motor_ctrl_msg);
+    m_motor_publisher.publish(motor_ctrl_msg);
 
     /*// Send new thrust to motors
     m_motors.setMotorThrust(MOTOR_1, motor1_thrust);
@@ -243,7 +319,7 @@ void FlightController::imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
         {
             // Calculate acro thrust adjustments
             Vect3F thrust_adjustments;
-            thrust_adjustments = m_rate_controller.getOutput(rates);
+            thrust_adjustments = m_rate_controller->getOutput(rates);
             // Send thrust adjustments to motors
             this->applyThrustAdjustments(thrust_adjustments);
             break;
@@ -253,11 +329,11 @@ void FlightController::imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
         {
             // Calculate stabalize angular velocity adjustments
             Vect3F rate_adjustments;
-            rate_adjustments = m_att_controller.getOutput(orientation);
+            rate_adjustments = m_att_controller->getOutput(orientation);
             rate_adjustments.z = m_yaw;
             // Calculate stabalize thrust adjustments
             Vect3F thrust_adjustments;
-            thrust_adjustments = m_rate_controller.getOutput(rate_adjustments);
+            thrust_adjustments = m_rate_controller->getOutput(rate_adjustments);
             // Send thrust adjustments to motors
             this->applyThrustAdjustments(thrust_adjustments);
             break;
@@ -337,7 +413,7 @@ void FlightController::yawCallback(const hector_uav_msgs::YawrateCommand::ConstP
     Vect3F commanded_values(m_pitch, m_roll, m_yaw); // formatted as phone's x, y, z axis
 
     // Update the controller with the new desired state
-    m_att_controller.setDesiredAtt(commanded_values);
+    m_att_controller->setDesiredAtt(commanded_values);
 }
 
 void FlightController::attitudeCallback(const hector_uav_msgs::AttitudeCommand::ConstPtr& msg)
@@ -350,5 +426,72 @@ void FlightController::attitudeCallback(const hector_uav_msgs::AttitudeCommand::
     Vect3F commanded_values(m_pitch, m_roll, m_yaw); // formatted as phone's x, y, z axis
 
     // Update the controller with the new desired state
-    m_att_controller.setDesiredAtt(commanded_values);
+    m_att_controller->setDesiredAtt(commanded_values);
+}
+
+
+void FlightController::dynamicReconfigureCallback(
+        quadrotor_controller::flight_controllerConfig &config, 
+        uint32_t level)
+{
+    // Re-load parameters for rate PIDs
+    m_roll_rate_pid_terms.x = config.rate_roll_KP;
+    m_roll_rate_pid_terms.y = config.rate_roll_KI;
+    m_roll_rate_pid_terms.z = config.rate_roll_KD;
+    
+    m_pitch_rate_pid_terms.x = config.rate_pitch_KP;
+    m_pitch_rate_pid_terms.y = config.rate_pitch_KI;
+    m_pitch_rate_pid_terms.z = config.rate_pitch_KD;
+    
+    m_yaw_rate_pid_terms.x = config.rate_yaw_KP;
+    m_yaw_rate_pid_terms.y = config.rate_yaw_KI;
+    m_yaw_rate_pid_terms.z = config.rate_yaw_KD;
+    
+    // Re-load parameters for attitude PIDs
+    m_roll_att_pid_terms.x = config.att_roll_KP;
+    m_roll_att_pid_terms.y = config.att_roll_KI;
+    m_roll_att_pid_terms.z = config.att_roll_KD;
+    
+    m_pitch_att_pid_terms.x = config.att_pitch_KP;
+    m_pitch_att_pid_terms.y = config.att_pitch_KI;
+    m_pitch_att_pid_terms.z = config.att_pitch_KD;
+    
+    m_yaw_att_pid_terms.x = config.att_yaw_KP;
+    m_yaw_att_pid_terms.y = config.att_yaw_KI;
+    m_yaw_att_pid_terms.z = config.att_yaw_KD;
+
+    // Re-start PID controllers
+    m_rate_controller->reset(m_roll_rate_pid_terms, m_pitch_rate_pid_terms, m_yaw_rate_pid_terms);
+    m_att_controller->reset(m_roll_att_pid_terms, m_pitch_att_pid_terms, m_yaw_att_pid_terms);
+
+    // Log the new values to console
+    std::stringstream info;
+    info << "\nLOADED NEW PID PARAMETERS:\n"
+         << "Controller_Name\tKP\tKI\tKD\n"
+         << "Roll Rate\t" 
+             << m_roll_rate_pid_terms.x << "\t" 
+             << m_roll_rate_pid_terms.y << "\t"
+             << m_roll_rate_pid_terms.z << "\n"
+         << "Pitch Rate\t"
+             << m_pitch_rate_pid_terms.x << "\t"
+             << m_pitch_rate_pid_terms.y << "\t"
+             << m_pitch_rate_pid_terms.z << "\n"
+         << "Yaw Rate\t"
+             << m_yaw_rate_pid_terms.x << "\t"
+             << m_yaw_rate_pid_terms.y << "\t" 
+             << m_yaw_rate_pid_terms.z << "\n"
+         << "Roll Att\t"
+             << m_roll_att_pid_terms.x << "\t"
+             << m_roll_att_pid_terms.y << "\t"
+             << m_roll_att_pid_terms.z << "\n"
+         << "Pitch Att\t"
+             << m_pitch_att_pid_terms.x << "\t"
+             << m_pitch_att_pid_terms.y << "\t"
+             << m_pitch_att_pid_terms.z << "\n"
+         << "Yaw Att\t\t"
+             << m_yaw_att_pid_terms.x << "\t"
+             << m_yaw_att_pid_terms.y << "\t"
+             << m_yaw_att_pid_terms.z << "\n"
+         << std::endl;
+    ROS_INFO_STREAM(info.str());
 }
