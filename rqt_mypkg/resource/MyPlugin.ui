@@ -1,0 +1,685 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Drone_GUI</class>
+ <widget class="QWidget" name="Drone_GUI">
+  <property name="windowTitle">
+   <string>Drone_GUI</string>
+  </property>
+
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1400</width>
+    <height>325</height>
+   </rect>
+  </property>
+
+   <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="spacing">
+            <number>0</number>
+        </property>
+        <property name="margin">
+            <number>0</number>
+        </property>
+
+        <item>
+        <layout class = "QHBoxLayout" name ="HLay1">
+            <property name="spacing">
+                <number>0</number>
+            </property>
+            <property name="margin">
+                <number>0</number>
+            </property>
+
+             <item>
+                <widget class="QLabel" name="Full_Msg">
+                    <property name="minimumSize">
+                        <size>
+                            <width>20</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>80</width>
+                            <height>35</height>
+                        </size>
+                    </property>
+                    <property name="toolTip">
+                        <string>Test String1</string>
+                    </property>
+                    <property name="frameShape">
+                        <enum>QFrame::Panel</enum>
+                    </property>
+                    
+                    <property name="lineWidth">
+                        <number>0</number>
+                    </property>
+                    <property name="text">
+                        <string>Full MSG</string>
+                    </property>
+                </widget>
+            </item>    
+
+            <item>
+                <widget class="QLabel" name="text1">
+                    <property name="minimumSize">
+                        <size>
+                            <width>200</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>400</width>
+                            <height>35</height>
+                        </size>
+                    </property>
+                    <property name="toolTip">
+                        <string>Test String1</string>
+                    </property>
+                    <property name="frameShape">
+                        <enum>QFrame::Panel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>QFrame::Sunken</enum>
+                    </property>
+                    <property name="lineWidth">
+                        <number>2</number>
+                    </property>
+                    <property name="text">
+                        <string>Drone_GUI</string>
+                    </property>
+                </widget>
+            </item>    
+        </layout>
+        </item>
+
+        <item>
+        <layout class = "QHBoxLayout" name ="HLay1">
+            <property name="spacing">
+                <number>0</number>
+            </property>
+            <property name="margin">
+                <number>0</number>
+            </property>
+
+             <item>
+                <widget class="QLabel" name="Header">
+                    <property name="minimumSize">
+                        <size>
+                            <width>20</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>80</width>
+                            <height>35</height>
+                        </size>
+                    </property>
+                    <property name="toolTip">
+                        <string>Test String1</string>
+                    </property>
+                    <property name="frameShape">
+                        <enum>QFrame::Panel</enum>
+                    </property>
+                    
+                    <property name="lineWidth">
+                        <number>0</number>
+                    </property>
+                    <property name="text">
+                        <string>Header</string>
+                    </property>
+                </widget>
+            </item>    
+
+            <item>
+                <widget class="QLabel" name="sHeader">
+                    <property name="minimumSize">
+                        <size>
+                            <width>200</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>400</width>
+                            <height>35</height>
+                        </size>
+                    </property>
+                    <property name="toolTip">
+                        <string>Test String1</string>
+                    </property>
+                    <property name="frameShape">
+                        <enum>QFrame::Panel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>QFrame::Sunken</enum>
+                    </property>
+                    <property name="lineWidth">
+                        <number>2</number>
+                    </property>
+                    <property name="text">
+                        <string>Drone_GUI</string>
+                    </property>
+                </widget>
+            </item>    
+        </layout>
+        </item>
+
+        <item>
+        <layout class = "QHBoxLayout" name ="HLay3">
+            <property name="spacing">
+                <number>0</number>
+            </property>
+            <property name="margin">
+                <number>0</number>
+            </property>
+
+             <item>
+                <widget class="QLabel" name="Time">
+                    <property name="minimumSize">
+                        <size>
+                            <width>20</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>80</width>
+                            <height>35</height>
+                        </size>
+                    </property>
+                    <property name="toolTip">
+                        <string>Test String1</string>
+                    </property>
+                    <property name="frameShape">
+                        <enum>QFrame::Panel</enum>
+                    </property>
+                    
+                    <property name="lineWidth">
+                        <number>0</number>
+                    </property>
+                    <property name="text">
+                        <string>Time</string>
+                    </property>
+                </widget>
+            </item>    
+
+            <item>
+                <widget class="QLabel" name="sTime">
+                    <property name="minimumSize">
+                        <size>
+                            <width>200</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>400</width>
+                            <height>35</height>
+                        </size>
+                    </property>
+                    <property name="toolTip">
+                        <string>Test String1</string>
+                    </property>
+                    <property name="frameShape">
+                        <enum>QFrame::Panel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>QFrame::Sunken</enum>
+                    </property>
+                    <property name="lineWidth">
+                        <number>2</number>
+                    </property>
+                    <property name="text">
+                        <string>Drone_GUI</string>
+                    </property>
+                </widget>
+            </item>    
+        </layout>
+        </item>
+
+        <item>
+        <layout class = "QHBoxLayout" name ="HLay4">
+            <property name="spacing">
+                <number>0</number>
+            </property>
+            <property name="margin">
+                <number>0</number>
+            </property>
+
+             <item>
+                <widget class="QLabel" name="Orientation">
+                    <property name="minimumSize">
+                        <size>
+                            <width>140</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>150</width>
+                            <height>35</height>
+                        </size>
+                    </property>
+                    <property name="toolTip">
+                        <string>Test String1</string>
+                    </property>
+                    <property name="frameShape">
+                        <enum>QFrame::Panel</enum>
+                    </property>
+                    
+                    <property name="lineWidth">
+                        <number>0</number>
+                    </property>
+                    <property name="text">
+                        <string>Orientation </string>
+                    </property>
+                </widget>
+            </item>    
+
+            <item>
+                <widget class="QLabel" name="sOrntX">
+                    <property name="minimumSize">
+                        <size>
+                            <width>25</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>100</width>
+                            <height>35</height>
+                        </size>
+                    </property>
+                    <property name="toolTip">
+                        <string>Test String1</string>
+                    </property>
+                    <property name="frameShape">
+                        <enum>QFrame::Panel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>QFrame::Sunken</enum>
+                    </property>
+                    <property name="lineWidth">
+                        <number>2</number>
+                    </property>
+                    <property name="text">
+                        <string>Drone_GUI</string>
+                    </property>
+                </widget>
+            </item>    
+            <item>
+                <widget class="QLabel" name="sOrntY">
+                    <property name="minimumSize">
+                        <size>
+                            <width>25</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>100</width>
+                            <height>35</height>
+                        </size>
+                    </property>
+                    <property name="toolTip">
+                        <string>Test String1</string>
+                    </property>
+                    <property name="frameShape">
+                        <enum>QFrame::Panel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>QFrame::Sunken</enum>
+                    </property>
+                    <property name="lineWidth">
+                        <number>2</number>
+                    </property>
+                    <property name="text">
+                        <string>Drone_GUI</string>
+                    </property>
+                </widget>
+            </item>    
+            <item>
+                <widget class="QLabel" name="sOrntZ">
+                    <property name="minimumSize">
+                        <size>
+                            <width>25</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>100</width>
+                            <height>35</height>
+                        </size>
+                    </property>
+                    <property name="toolTip">
+                        <string>Test String1</string>
+                    </property>
+                    <property name="frameShape">
+                        <enum>QFrame::Panel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>QFrame::Sunken</enum>
+                    </property>
+                    <property name="lineWidth">
+                        <number>2</number>
+                    </property>
+                    <property name="text">
+                        <string>Drone_GUI</string>
+                    </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLabel" name="sOrntW">
+                    <property name="minimumSize">
+                        <size>
+                            <width>50</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>100</width>
+                            <height>35</height>
+                        </size>
+                    </property>
+                    <property name="toolTip">
+                        <string>Test String1</string>
+                    </property>
+                    <property name="frameShape">
+                        <enum>QFrame::Panel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>QFrame::Sunken</enum>
+                    </property>
+                    <property name="lineWidth">
+                        <number>2</number>
+                    </property>
+                    <property name="text">
+                        <string>Drone_GUI</string>
+                    </property>
+                </widget>
+            </item>
+
+        </layout>
+        </item>
+
+
+         <item>
+        <layout class = "QHBoxLayout" name ="HLay5">
+            <property name="spacing">
+                <number>0</number>
+            </property>
+            <property name="margin">
+                <number>0</number>
+            </property>
+
+             <item>
+                <widget class="QLabel" name="AngVel">
+                    <property name="minimumSize">
+                        <size>
+                            <width>140</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>150</width>
+                            <height>35</height>
+                        </size>
+                    </property>
+                    <property name="toolTip">
+                        <string>Test String1</string>
+                    </property>
+                    <property name="frameShape">
+                        <enum>QFrame::Panel</enum>
+                    </property>
+                    
+                    <property name="lineWidth">
+                        <number>0</number>
+                    </property>
+                    <property name="text">
+                        <string>Angular Velocity</string>
+                    </property>
+                </widget>
+            </item>    
+
+            <item>
+                <widget class="QLabel" name="sAngVelX">
+                    <property name="minimumSize">
+                        <size>
+                            <width>25</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>100</width>
+                            <height>35</height>
+                        </size>
+                    </property>
+                    <property name="toolTip">
+                        <string>Test String1</string>
+                    </property>
+                    <property name="frameShape">
+                        <enum>QFrame::Panel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>QFrame::Sunken</enum>
+                    </property>
+                    <property name="lineWidth">
+                        <number>2</number>
+                    </property>
+                    <property name="text">
+                        <string>Drone_GUI</string>
+                    </property>
+                </widget>
+            </item> 
+            <item>
+                <widget class="QLabel" name="sAngVelY">
+                    <property name="minimumSize">
+                        <size>
+                            <width>25</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>100</width>
+                            <height>35</height>
+                        </size>
+                    </property>
+                    <property name="toolTip">
+                        <string>Test String1</string>
+                    </property>
+                    <property name="frameShape">
+                        <enum>QFrame::Panel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>QFrame::Sunken</enum>
+                    </property>
+                    <property name="lineWidth">
+                        <number>2</number>
+                    </property>
+                    <property name="text">
+                        <string>Drone_GUI</string>
+                    </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLabel" name="sAngVelZ">
+                    <property name="minimumSize">
+                        <size>
+                            <width>25</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>100</width>
+                            <height>35</height>
+                        </size>
+                    </property>
+                    <property name="toolTip">
+                        <string>Test String1</string>
+                    </property>
+                    <property name="frameShape">
+                        <enum>QFrame::Panel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>QFrame::Sunken</enum>
+                    </property>
+                    <property name="lineWidth">
+                        <number>2</number>
+                    </property>
+                    <property name="text">
+                        <string>Drone_GUI</string>
+                    </property>
+                </widget>
+            </item>   
+        </layout>
+        </item>
+
+         <item>
+        <layout class = "QHBoxLayout" name ="HLay6">
+            <property name="spacing">
+                <number>0</number>
+            </property>
+            <property name="margin">
+                <number>0</number>
+            </property>
+
+             <item>
+                <widget class="QLabel" name="LinAcc">
+                    <property name="minimumSize">
+                        <size>
+                            <width>140</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>150</width>
+                            <height>35</height>
+                        </size>
+                    </property>
+                    <property name="toolTip">
+                        <string>Test String1</string>
+                    </property>
+                    <property name="frameShape">
+                        <enum>QFrame::Panel</enum>
+                    </property>
+                    
+                    <property name="lineWidth">
+                        <number>0</number>
+                    </property>
+                    <property name="text">
+                        <string>Linear Accelleration</string>
+                    </property>
+                </widget>
+            </item>    
+
+            <item>
+                <widget class="QLabel" name="sLinAccX">
+                    <property name="minimumSize">
+                        <size>
+                            <width>25</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>100</width>
+                            <height>35</height>
+                        </size>
+                    </property>
+                    <property name="toolTip">
+                        <string>Test String1</string>
+                    </property>
+                    <property name="frameShape">
+                        <enum>QFrame::Panel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>QFrame::Sunken</enum>
+                    </property>
+                    <property name="lineWidth">
+                        <number>2</number>
+                    </property>
+                    <property name="text">
+                        <string>Drone_GUI</string>
+                    </property>
+                </widget>
+            </item> 
+            <item>
+                <widget class="QLabel" name="sLinAccY">
+                    <property name="minimumSize">
+                        <size>
+                            <width>25</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>100</width>
+                            <height>35</height>
+                        </size>
+                    </property>
+                    <property name="toolTip">
+                        <string>Test String1</string>
+                    </property>
+                    <property name="frameShape">
+                        <enum>QFrame::Panel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>QFrame::Sunken</enum>
+                    </property>
+                    <property name="lineWidth">
+                        <number>2</number>
+                    </property>
+                    <property name="text">
+                        <string>Drone_GUI</string>
+                    </property>
+                </widget>
+            </item>
+            <item>
+                <widget class="QLabel" name="sLinAccZ">
+                    <property name="minimumSize">
+                        <size>
+                            <width>25</width>
+                            <height>10</height>
+                        </size>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>100</width>
+                            <height>35</height>
+                        </size>
+                    </property>
+                    <property name="toolTip">
+                        <string>Test String1</string>
+                    </property>
+                    <property name="frameShape">
+                        <enum>QFrame::Panel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>QFrame::Sunken</enum>
+                    </property>
+                    <property name="lineWidth">
+                        <number>2</number>
+                    </property>
+                    <property name="text">
+                        <string>Drone_GUI</string>
+                    </property>
+                </widget>
+            </item>   
+        </layout>
+        </item>
+   </layout>
+ </widget>
+
+</ui>
