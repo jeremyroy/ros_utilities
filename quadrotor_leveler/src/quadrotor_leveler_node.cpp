@@ -18,6 +18,11 @@
 #include "geometry_msgs/Twist.h"
 #include "hector_uav_msgs/AttitudeCommand.h"
 
+#include <chrono>
+#include <fstream>
+
+std::ofstream outfile("time_stamp.txt");
+
 /////////////
 // Defines //
 /////////////
@@ -155,6 +160,19 @@ void attitudeCallback(const hector_uav_msgs::AttitudeCommand::ConstPtr& msg)
 
         // Publish formatted message
         g_pub_ajusted_attitude.publish(new_att_commands);
+        
+        // Latency test: If it's the first time roll is greater than 0.6, record current time
+        static bool time_logged = false;
+        if ((roll_cmd >= 0.785398185253) && (time_logged == false))
+        {
+            time_logged = true;
+            std::chrono::time_point<std::chrono::system_clock> now = 
+                    std::chrono::system_clock::now();
+            auto duration = now.time_since_epoch();
+            auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+            outfile << millis << std::endl;
+            outfile.close();
+        }
     }
 }
 
