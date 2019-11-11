@@ -112,7 +112,9 @@ processed, this
 to throw
    * away the oldest ones.
    */ // %Tag(SUBSCRIBER)%
-  ros::Subscriber sub = n.subscribe("phone_imu", 1000, chatterCallback); 
+  std::string imu_topic;
+  n.param<std::string>("imu_topic", imu_topic, "imu/data");
+  ros::Subscriber sub = n.subscribe(imu_topic, 1000, chatterCallback); 
 // %EndTag(SUBSCRIBER)%
 
   /**
