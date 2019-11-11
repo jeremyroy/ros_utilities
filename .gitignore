@@ -1,1 +1,3 @@
 *.swp
+*.vscode
+*XDG_CACHE_HOME/
